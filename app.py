@@ -65,14 +65,23 @@ def generate():
     if not user_query:
         return jsonify({"error": "La requête est vide"}), 400
     
-    sql = llm.generate_sql(user_query)
+    llm_res = llm.generate_sql(user_query)
     
+    if isinstance(llm_res, str):
+        return jsonify({"sql": llm_res, "explanation": "Erreur ou requête invalide."})
+
+    sql = llm_res.get("sql", "")
+    explanation = llm_res.get("explanation", "Voici votre requête.")
+
     # Formatage SQL
     if sql and not sql.startswith("Error:"):
-        sql = sqlparse.format(sql, reindent=True, keyword_case='upper')
+        try:
+            sql = sqlparse.format(sql, reindent=True, keyword_case='upper', strip_comments=False)
+        except:
+            pass
         
-    print(f"DEBUG: SQL généré et formaté: {sql}")
-    return jsonify({"sql": sql})
+    print(f"DEBUG: SQL généré: {sql}")
+    return jsonify({"sql": sql, "explanation": explanation})
 
 def compute_stats(columns, data):
     if not data:
@@ -130,6 +139,15 @@ def execute():
     print(f"DEBUG: Exécution SQL demandée (nettoyée): {sql}")
     if not sql:
         return jsonify({"error": "Le SQL est vide"}), 400
+    
+    # --- VÉRIFICATION DE SÉCURITÉ ---
+    sql_upper = sql.upper()
+    forbidden_keywords = ["DROP", "DELETE", "TRUNCATE", "UPDATE", "ALTER", "CREATE", "GRANT", "REVOKE", "INSERT"]
+    
+    for kw in forbidden_keywords:
+        # On vérifie avec un regex pour s'assurer que c'est le mot entier (pas une colonne type 'STATUT_UPDATE')
+        if re.search(r'\b' + kw + r'\b', sql_upper):
+            return jsonify({"error": f"Sécurité : L'instruction '{kw}' n'est pas autorisée dans cet éditeur."}), 403
     
     import time
     start_time = time.perf_counter()
@@ -246,6 +264,11 @@ def delete_history():
     new_history = [item for item in history if str(item.get("id")) != str(item_id)]
     save_history(new_history)
     return jsonify({"status": "ok"})
+
+@app.route("/api/fix_sql", methods=["POST"])
+def fix_sql():
+    from routes.fix_sql import fix_sql_route
+    return fix_sql_route()
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

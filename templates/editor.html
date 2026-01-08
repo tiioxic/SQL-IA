@@ -33,21 +33,10 @@
                 <span>Nouveau Projet</span>
             </button>
 
-            <div class="schema-section">
-                <h3 class="history-title">Explorateur</h3>
-                <div id="schema-list" class="schema-list">
-                    <div class="schema-table">
-                        <i data-lucide="table"></i> <span>CLIENTS</span>
-                    </div>
-                    <div class="schema-table">
-                        <i data-lucide="table"></i> <span>PRODUITS</span>
-                    </div>
-                    <div class="schema-table">
-                        <i data-lucide="table"></i> <span>COMMANDES</span>
-                    </div>
-                    <div class="schema-table">
-                        <i data-lucide="table"></i> <span>DETAILS_COMMANDES</span>
-                    </div>
+            <div class="history-section">
+                <h3 class="history-title">Historique</h3>
+                <div id="history-list" class="history-list">
+                    <!-- Rempli par JS -->
                 </div>
             </div>
             <div class="sidebar-footer">
@@ -103,6 +92,10 @@
                 <div class="pane-header">
                     <span>Éditeur SQL Oracle</span>
                     <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn-secondary" id="fix-btn" onclick="fixSQL()"
+                            title="Corriger la requête avec l'IA">
+                            <i data-lucide="wrench"></i> Corriger
+                        </button>
                         <button class="btn-primary" id="run-btn" style="background: #10b981;">
                             <i data-lucide="play"></i> Exécuter
                         </button>
@@ -206,6 +199,43 @@
                 </div>
             </div>
         </aside>
+    </div>
+
+    <!-- MODAL DETAILS HISTORIQUE -->
+    <div id="history-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Détails de l'exécution</h2>
+                <button class="close-modal" onclick="closeHistoryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-group">
+                    <div class="detail-header-row">
+                        <label>Requête SQL</label>
+                        <button class="btn-copy-modal" onclick="copyModalSQL()" title="Copier le SQL">
+                            <i data-lucide="copy"></i> Copier
+                        </button>
+                    </div>
+                    <pre id="modal-sql-content"></pre>
+                </div>
+                <div class="detail-info-grid">
+                    <div class="info-card">
+                        <i data-lucide="calendar"></i>
+                        <div>
+                            <span class="info-label">Date d'exécution</span>
+                            <span class="info-value" id="modal-date"> - </span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <i data-lucide="clock"></i>
+                        <div>
+                            <span class="info-label">Heure d'exécution</span>
+                            <span class="info-value" id="modal-time-detail"> - </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://unpkg.com/lucide@latest"></script>
