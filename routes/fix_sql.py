@@ -5,8 +5,8 @@ import re
 
 def fix_sql_route():
     """
-    Endpoint pour corriger une requête SQL en utilisant l'IA.
-    Reçoit le SQL erroné et le message d'erreur Oracle, puis demande à l'IA de corriger.
+    Endpoint de correction SQL.
+    Approche mixte : Regex pour les erreurs évidentes, IA simplifiée pour le reste.
     """
     data = request.json
     sql = data.get("sql", "").strip()
@@ -15,43 +15,58 @@ def fix_sql_route():
     if not sql or not error:
         return jsonify({"error": "SQL et erreur requis"}), 400
     
-    # Prompt de correction pour l'IA - VERSION STRICTE
-    fix_prompt = f"""### Task
-You are an Oracle SQL expert. The following query has an error. Your job is to return the COMPLETE CORRECTED query.
+    explanation = ""
+    fixed_sql = sql
+    
+    # ---------------------------------------------------------
+    # 1. CORRECTION ALGORITHMIQUE (RÈGLES LOCALES)
+    # ---------------------------------------------------------
+    
+    corrected_locally = False
+    
+    # Règle 1: LIMIT -> FETCH FIRST
+    if "LIMIT" in fixed_sql.upper() and ("ORA-00933" in error or "ORA-00900" in error or "ORA-03049" in error):
+        if re.search(r'\bLIMIT\s+\d+', fixed_sql, re.IGNORECASE):
+            fixed_sql = re.sub(
+                r'\bLIMIT\s+(\d+)(\s*;)?',
+                r'FETCH FIRST \1 ROWS ONLY',
+                fixed_sql,
+                flags=re.IGNORECASE
+            )
+            explanation = "Correction syntaxe : LIMIT remplacé par FETCH FIRST (Oracle)."
+            corrected_locally = True
 
-### Original Query (WITH ERROR)
+    # Règle 2: NOW() -> SYSDATE
+    if "NOW()" in fixed_sql.upper():
+        fixed_sql = fixed_sql.replace("NOW()", "SYSDATE").replace("now()", "SYSDATE")
+        explanation = "Correction syntaxe : NOW() remplacé par SYSDATE (Oracle)."
+        corrected_locally = True
+
+    if corrected_locally:
+        try:
+            fixed_sql = sqlparse.format(fixed_sql, reindent=True, keyword_case='upper', strip_comments=False)
+        except:
+            pass
+        return jsonify({"fixed_sql": fixed_sql, "explanation": explanation})
+        
+    # ---------------------------------------------------------
+    # 2. APPEL À L'IA (Style Autocomplétion)
+    # ---------------------------------------------------------
+    
+    # Prompt simplifié au maximum pour éviter que le modèle ne s'embrouille
+    fix_prompt = f"""/*
+ * Database: Oracle SQL
+ * Task: Fix the query below based on the error message.
+ * Error Message: {error}
+ */
+
+-- Original Query:
 {sql}
 
-### Oracle Error Message
-{error}
-
-### CRITICAL RULES
-1. You MUST return the ENTIRE corrected SQL query from SELECT (or other command) to the end.
-2. DO NOT return only a fragment like "ORDER BY ..." or "FROM ...".
-3. Start with a comment (--) explaining the fix in FRENCH.
-4. Replace any MySQL/PostgreSQL syntax with Oracle syntax:
-   - REPLACE 'LIMIT n' WITH 'FETCH FIRST n ROWS ONLY'
-   - Use SYSDATE not NOW()
-   - Use || for concatenation
-5. Don't use a semi-colon at the end.
-
-### Example of GOOD response (COMPLETE QUERY)
--- Correction: Remplacement de LIMIT 10 par FETCH FIRST 10 ROWS ONLY
-SELECT CLIENTS.NOM, CLIENTS.PRENOM, SUM(COMMANDES.MONTANT_TOTAL) AS total
-FROM CLIENTS
-JOIN COMMANDES ON CLIENTS.CLIENT_ID = COMMANDES.CLIENT_ID
-GROUP BY CLIENTS.NOM, CLIENTS.PRENOM
-ORDER BY total DESC
-FETCH FIRST 10 ROWS ONLY
-
-### Example of BAD response (FRAGMENT - DO NOT DO THIS)
-ORDER BY total DESC FETCH FIRST 10 ROWS ONLY
-
-### Your Complete Corrected Query (start with --)
+-- Corrected Query (Oracle Syntax):
 """
     
     try:
-        # Appel à l'IA pour la correction
         from models.llm_handler import LLMHandler
         llm_instance = LLMHandler()
         
@@ -60,62 +75,48 @@ ORDER BY total DESC FETCH FIRST 10 ROWS ONLY
             "model": llm_instance.model_name,
             "prompt": fix_prompt,
             "stream": False,
-            "options": {"temperature": 0}
+            "options": {
+                "temperature": 0.1, # Très faible créativité pour rester factuel
+                "stop": [";", "```"] # Stop dès que la requête est finie
+            }
         }
         
         response = requests.post(llm_instance.api_url, json=payload, timeout=45)
         response.raise_for_status()
         llm_data = response.json()
-        fixed_code = llm_data.get("response", "").strip()
+        raw_response = llm_data.get("response", "").strip()
         
-        print(f"DEBUG: Réponse de correction brute: {fixed_code}")
+        print(f"DEBUG: Réponse IA brute: {raw_response}")
         
-        # Nettoyage agressif des tokens spéciaux et balises
-        fixed_code = re.sub(r'</?s>', '', fixed_code)  # Supprimer <s> et </s>
-        fixed_code = re.sub(r'<\|.*?\|>', '', fixed_code)  # Supprimer <|...|>
-        fixed_code = re.sub(r'^\s*[^\w\-]+', '', fixed_code)  # Supprimer caractères bizarres au début
-        fixed_code = fixed_code.strip()
+        # Nettoyage
+        cleaned_response = re.sub(r'</?s>', '', raw_response) # Supprime balises de fin de phrase
+        cleaned_response = re.sub(r'```sql', '', cleaned_response)
+        cleaned_response = re.sub(r'```', '', cleaned_response)
+        cleaned_response = cleaned_response.strip()
         
-        print(f"DEBUG: Après nettoyage: {fixed_code}")
+        # Si la réponse commence par "SELECT" (ou autre) c'est gagné
+        # Sinon, on cherche le premier bloc SQL valide
+        if not re.match(r'^(SELECT|INSERT|UPDATE|DELETE|WITH)', cleaned_response, re.IGNORECASE):
+            # Recherche d'un motif SQL
+            match = re.search(r'(SELECT|INSERT|UPDATE|DELETE|WITH).*', cleaned_response, re.IGNORECASE | re.DOTALL)
+            if match:
+                cleaned_response = match.group(0)
         
-        # Vérification que la réponse contient bien SELECT (ou autre commande SQL)
-        if not re.search(r'\b(SELECT|INSERT|UPDATE|DELETE|WITH)\b', fixed_code, re.IGNORECASE):
-            # L'IA a renvoyé un fragment, on utilise le fallback
-            print("DEBUG: Fragment détecté, utilisation du fallback automatique...")
-            fixed_code = sql  # On part de l'original
-        
-        # FALLBACK AUTOMATIQUE : Remplacement de LIMIT par FETCH FIRST
-        if re.search(r'\bLIMIT\s+\d+', fixed_code, re.IGNORECASE):
-            print("DEBUG: LIMIT détecté, remplacement automatique...")
-            fixed_code = re.sub(
-                r'\bLIMIT\s+(\d+)\b',
-                r'FETCH FIRST \1 ROWS ONLY',
-                fixed_code,
-                flags=re.IGNORECASE
-            )
-            explanation = "Remplacement automatique de LIMIT par FETCH FIRST ROWS ONLY (syntaxe Oracle)."
-        else:
-            # Extraction de l'explication depuis les commentaires
-            comments = re.findall(r'^--\s*(.*)', fixed_code, re.MULTILINE)
-            explanation = " ".join(comments[:2]) if comments else "Requête corrigée."
-            if "Correction:" in explanation:
-                explanation = explanation.split("Correction:")[1].strip()
-        
-        # Nettoyage final du SQL
-        fixed_sql = fixed_code.replace('\\n', '\n').replace('\\"', '"')
-        
-        # Formatage avec sqlparse
-        if fixed_sql and not fixed_sql.startswith("Error:"):
-            try:
-                fixed_sql = sqlparse.format(fixed_sql, reindent=True, keyword_case='upper', strip_comments=False)
-            except Exception as e:
-                print(f"DEBUG: Erreur formatage sqlparse: {e}")
-                pass
-        
-        print(f"DEBUG: SQL final à renvoyer: {fixed_sql}")
+        # Validation minimale
+        if len(cleaned_response) < 10:
+             return jsonify({"fixed_sql": sql, "explanation": "L'IA n'a pas pu identifier la correction."})
+
+        fixed_sql = cleaned_response
+        explanation = f"Correction suggérée pour l'erreur : {error}"
+
+        # Formatage
+        try:
+            fixed_sql = sqlparse.format(fixed_sql, reindent=True, keyword_case='upper', strip_comments=False)
+        except:
+            pass
         
         return jsonify({"fixed_sql": fixed_sql, "explanation": explanation})
         
     except Exception as e:
-        print(f"DEBUG: Erreur correction: {str(e)}")
-        return jsonify({"error": f"Impossible de corriger: {str(e)}"}), 500
+        print(f"DEBUG: Erreur IA: {str(e)}")
+        return jsonify({"error": f"Erreur technique: {str(e)}"}), 500

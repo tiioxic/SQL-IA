@@ -1,0 +1,99 @@
+/* CHAT SIDEBAR (RIGHT) WITH RESIZER */
+.chat-resizer {
+    width: 4px;
+    cursor: col-resize;
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: background-color 0.2s;
+    z-index: 100;
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+}
+
+.chat-resizer:hover {
+    background-color: var(--primary-color);
+}
+
+.chat-sidebar {
+    width: var(--sidebar-right-width);
+    background: var(--bg-panel);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+    flex-shrink: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-header {
+    height: var(--header-height);
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.chat-input-area {
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-sidebar);
+}
+
+.chat-input-wrapper {
+    display: flex;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.5rem;
+    gap: 0.5rem;
+}
+
+.chat-textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    resize: none;
+    padding: 0.5rem;
+    outline: none;
+    font-family: inherit;
+}
+
+.message-bubble {
+    max-width: 90%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.user .message-bubble {
+    background: var(--primary-color);
+    color: white;
+    align-self: flex-end;
+}
+
+.ai .message-bubble {
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-color);
+    align-self: flex-start;
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+}
+
+.user {
+    align-items: flex-end;
+}

@@ -1,0 +1,59 @@
+:root {
+    --primary-color: #6366f1;
+    --primary-soft: rgba(99, 102, 241, 0.1);
+    --bg-app: #0f172a;
+    --bg-sidebar: #020617;
+    --bg-panel: #1e293b;
+    --text-main: #f3f4f6;
+    --text-muted: #94a3b8;
+    --border-color: #1e293b;
+    --input-bg: #0f172a;
+    --editor-bg: #1e293b;
+
+    --sidebar-left-width: 260px;
+    --sidebar-right-width: 350px;
+    --header-height: 50px;
+    --radius-lg: 12px;
+    --radius-md: 8px;
+}
+
+[data-theme="light"] {
+    --bg-app: #f8fafc;
+    --bg-sidebar: #f1f5f9;
+    --bg-panel: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --input-bg: #ffffff;
+    --editor-bg: #f8fafc;
+}
+
+body.c-indigo {
+    --primary-color: #4f46e5;
+    --primary-soft: rgba(79, 70, 229, 0.1);
+}
+
+body.c-emerald {
+    --primary-color: #10b981;
+    --primary-soft: rgba(16, 185, 129, 0.1);
+}
+
+body.c-rose {
+    --primary-color: #f43f5e;
+    --primary-soft: rgba(244, 63, 94, 0.1);
+}
+
+body.c-amber {
+    --primary-color: #f59e0b;
+    --primary-soft: rgba(245, 158, 11, 0.1);
+}
+
+body.c-sky {
+    --primary-color: #0ea5e9;
+    --primary-soft: rgba(14, 165, 233, 0.1);
+}
+
+body.c-slate {
+    --primary-color: #64748b;
+    --primary-soft: rgba(100, 116, 139, 0.1);
+}

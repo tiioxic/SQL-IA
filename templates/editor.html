@@ -11,7 +11,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <!-- CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body class="c-indigo">
@@ -44,7 +44,7 @@
                     <i data-lucide="message-square"></i>
                     <span>Mode Chat Classique</span>
                 </div>
-                <div class="footer-action" id="theme-btn" onclick="toggleThemePopover(event)">
+                <div class="footer-action" id="theme-btn" onclick="window.toggleThemePopover(event)">
                     <i data-lucide="palette"></i>
                     <span>Thème & Couleurs</span>
                 </div>
@@ -53,29 +53,31 @@
                 <div id="theme-popover">
                     <div style="margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600;">Mode</div>
                     <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                        <button onclick="setMode('light')" class="footer-action"
+                        <button onclick="window.setMode('light')" class="footer-action"
                             style="flex: 1; justify-content: center; height: 36px; padding: 0;"><i
                                 data-lucide="sun"></i></button>
-                        <button onclick="setMode('dark')" class="footer-action"
+                        <button onclick="window.setMode('dark')" class="footer-action"
                             style="flex: 1; justify-content: center; height: 36px; padding: 0;"><i
                                 data-lucide="moon"></i></button>
                     </div>
                     <div style="margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600;">Couleurs</div>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-                        <div class="color-swatch" onclick="setColor('indigo')" style="background: #4f46e5;"></div>
-                        <div class="color-swatch" onclick="setColor('emerald')" style="background: #10b981;"></div>
-                        <div class="color-swatch" onclick="setColor('rose')" style="background: #f43f5e;"></div>
-                        <div class="color-swatch" onclick="setColor('amber')" style="background: #f59e0b;"></div>
-                        <div class="color-swatch" onclick="setColor('sky')" style="background: #0ea5e9;"></div>
-                        <div class="color-swatch" onclick="setColor('slate')" style="background: #64748b;"></div>
+                        <div class="color-swatch" onclick="window.setColor('indigo')" style="background: #4f46e5;">
+                        </div>
+                        <div class="color-swatch" onclick="window.setColor('emerald')" style="background: #10b981;">
+                        </div>
+                        <div class="color-swatch" onclick="window.setColor('rose')" style="background: #f43f5e;"></div>
+                        <div class="color-swatch" onclick="window.setColor('amber')" style="background: #f59e0b;"></div>
+                        <div class="color-swatch" onclick="window.setColor('sky')" style="background: #0ea5e9;"></div>
+                        <div class="color-swatch" onclick="window.setColor('slate')" style="background: #64748b;"></div>
                     </div>
                 </div>
 
-                <div class="footer-action" onclick="initDatabase()">
+                <div class="footer-action" onclick="window.initDatabase()">
                     <i data-lucide="database"></i>
                     <span>Initialiser BDD</span>
                 </div>
-                <div class="footer-action" onclick="seedDatabase()">
+                <div class="footer-action" onclick="window.seedDatabase()">
                     <i data-lucide="user-plus"></i>
                     <span>Alimenter (Faker)</span>
                 </div>
@@ -92,7 +94,7 @@
                 <div class="pane-header">
                     <span>Éditeur SQL Oracle</span>
                     <div style="display: flex; gap: 0.5rem;">
-                        <button class="btn-secondary" id="fix-btn" onclick="fixSQL()"
+                        <button class="btn-secondary" id="fix-btn" onclick="window.fixSQL()"
                             title="Corriger la requête avec l'IA">
                             <i data-lucide="wrench"></i> Corriger
                         </button>
@@ -115,14 +117,16 @@
                     <span>Résultats</span>
                     <div class="results-meta">
                         <div class="export-dropdown">
-                            <button class="btn-export" onclick="toggleExportMenu(event)">
+                            <button class="btn-export" onclick="window.toggleExportMenu(event)">
                                 <i data-lucide="download"></i>
                                 <span>Exporter</span>
                                 <i data-lucide="chevron-down" style="width:12px; height:12px;"></i>
                             </button>
                             <div class="export-menu" id="export-menu">
-                                <a href="#" onclick="exportData('csv')"><i data-lucide="file-spreadsheet"></i> CSV</a>
-                                <a href="#" onclick="exportData('txt')"><i data-lucide="file-text"></i> TXT (|)</a>
+                                <a href="#" onclick="window.exportData('csv')"><i data-lucide="file-spreadsheet"></i>
+                                    CSV</a>
+                                <a href="#" onclick="window.exportData('txt')"><i data-lucide="file-text"></i> TXT
+                                    (|)</a>
                             </div>
                         </div>
                         <div class="meta-item" id="meta-time" style="display: none;">
@@ -150,8 +154,8 @@
         <!-- RIGHT SIDEBAR: AI + DIAGNOSTICS -->
         <aside class="chat-sidebar" id="chat-sidebar">
             <div class="sidebar-tabs">
-                <button class="tab-btn active" onclick="switchTab('ai')">Assistant</button>
-                <button class="tab-btn" onclick="switchTab('stats')">Diagnostics</button>
+                <button class="tab-btn active" onclick="window.switchTab('ai')">Assistant</button>
+                <button class="tab-btn" onclick="window.switchTab('stats')">Diagnostics</button>
             </div>
 
             <!-- AI CONTENT -->
@@ -206,13 +210,13 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Détails de l'exécution</h2>
-                <button class="close-modal" onclick="closeHistoryModal()">&times;</button>
+                <button class="close-modal" onclick="window.closeHistoryModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="detail-group">
                     <div class="detail-header-row">
                         <label>Requête SQL</label>
-                        <button class="btn-copy-modal" onclick="copyModalSQL()" title="Copier le SQL">
+                        <button class="btn-copy-modal" onclick="window.copyModalSQL()" title="Copier le SQL">
                             <i data-lucide="copy"></i> Copier
                         </button>
                     </div>
@@ -239,8 +243,7 @@
     </div>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="{{ url_for('static', filename='js/editor.js') }}"></script>
-    <script>lucide.createIcons();</script>
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 
 </html>

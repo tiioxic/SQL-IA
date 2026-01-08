@@ -1,0 +1,62 @@
+/* APP CONTAINER */
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* WORKSPACE CENTRAL (EDITOR + RESULTS) */
+.ide-workspace {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-app);
+    overflow: hidden;
+}
+
+.editor-pane {
+    height: 50%;
+    min-height: 100px;
+}
+
+.results-pane {
+    flex: 1;
+    min-height: 100px;
+}
+
+/* RESIZER VERTICAL */
+.resizer-v {
+    height: 4px;
+    cursor: row-resize;
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: background-color 0.2s;
+    z-index: 100;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.resizer-v:hover {
+    background-color: var(--primary-color);
+}
+
+.pane {
+    background: var(--bg-panel);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.pane-header {
+    height: 48px;
+    padding: 0 1rem;
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
