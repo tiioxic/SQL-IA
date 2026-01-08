@@ -1,0 +1,20 @@
+[
+    {
+        "id": 3,
+        "query": "Liste les 10 meilleurs clients par montant de commande",
+        "sql": "SELECT C.NOM,\n       C.PRENOM,\n       SUM(O.MONTANT_TOTAL) AS TOTAL_DEPENSE\nFROM CLIENTS C\nJOIN COMMANDES O ON C.CLIENT_ID = O.CLIENT_ID\nGROUP BY C.NOM,\n         C.PRENOM\nORDER BY TOTAL_DEPENSE DESC FETCH FIRST 10 ROWS ONLY;",
+        "timestamp": "2026-01-08 21:37:43"
+    },
+    {
+        "id": 2,
+        "query": "Liste les 10 meilleurs clients par montant de commande",
+        "sql": "SELECT C.NOM,\n       C.PRENOM,\n       SUM(O.MONTANT_TOTAL) AS TOTAL_DEPENSE\nFROM CLIENTS C\nJOIN COMMANDES O ON C.CLIENT_ID = O.CLIENT_ID\nGROUP BY C.NOM,\n         C.PRENOM\nORDER BY TOTAL_DEPENSE DESC FETCH FIRST 10 ROWS ONLY;",
+        "timestamp": "2026-01-08 21:00:25"
+    },
+    {
+        "id": 2,
+        "query": "Quelles sont les ventes totales par catégorie ?",
+        "sql": "SELECT CATEGORIE,\n       SUM(PRIX_LIGNE) AS TOTAL_VENDU\nFROM PRODUITS P\nJOIN DETAILS_COMMANDES DC ON P.PRODUIT_ID = DC.PRODUIT_ID\nGROUP BY CATEGORIE;",
+        "timestamp": "2026-01-08 18:42:47"
+    }
+]

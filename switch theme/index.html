@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Pinceau + modal couleurs</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!--
+    ✅ Checkbox pour la MODAL.
+    Elle est au même niveau que .modal-backdrop,
+    donc le sélecteur #theme-modal-toggle:checked ~ .modal-backdrop fonctionne.
+  -->
+  <input
+    type="checkbox"
+    id="theme-modal-toggle"
+    class="visually-hidden"
+  >
+
+  <!-- HEADER avec le bouton pinceau -->
+  <header>
+    <div class="logo">Mon Header</div>
+
+    <div class="header-actions">
+      <!-- Bouton pinceau -> MODAL CENTRÉE -->
+      <label
+        for="theme-modal-toggle"
+        class="icon-button"
+        title="Ouvrir la palette (modal)"
+      >
+        <!-- Icône Lucide (paintbrush vertical) en SVG inline -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paintbrush-icon lucide-paintbrush"><path d="m14.622 17.897-10.68-2.913"/><path d="M18.376 2.622a1 1 0 1 1 3.002 3.002L17.36 9.643a.5.5 0 0 0 0 .707l.944.944a2.41 2.41 0 0 1 0 3.408l-.944.944a.5.5 0 0 1-.707 0L8.354 7.348a.5.5 0 0 1 0-.707l.944-.944a2.41 2.41 0 0 1 3.408 0l.944.944a.5.5 0 0 0 .707 0z"/><path d="M9 8c-1.804 2.71-3.97 3.46-6.583 3.948a.507.507 0 0 0-.302.819l7.32 8.883a1 1 0 0 0 1.185.204C12.735 20.405 16 16.792 16 15"/></svg>
+      </label>
+
+      <!-- Variante : Pinceau -> BULLE DE COULEURS sous le bouton -->
+      <div class="popover-wrapper">
+        <input
+          type="checkbox"
+          id="theme-popover-toggle"
+          class="visually-hidden"
+        >
+        <label
+          for="theme-popover-toggle"
+          class="icon-button"
+          title="Palette rapide (bulle)"
+        >
+          <!-- même icône Lucide, réutilisée -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paintbrush-icon lucide-paintbrush"><path d="m14.622 17.897-10.68-2.913"/><path d="M18.376 2.622a1 1 0 1 1 3.002 3.002L17.36 9.643a.5.5 0 0 0 0 .707l.944.944a2.41 2.41 0 0 1 0 3.408l-.944.944a.5.5 0 0 1-.707 0L8.354 7.348a.5.5 0 0 1 0-.707l.944-.944a2.41 2.41 0 0 1 3.408 0l.944.944a.5.5 0 0 0 .707 0z"/><path d="M9 8c-1.804 2.71-3.97 3.46-6.583 3.948a.507.507 0 0 0-.302.819l7.32 8.883a1 1 0 0 0 1.185.204C12.735 20.405 16 16.792 16 15"/></svg>
+        </label>
+        <!-- Overlay global pour fermer en cliquant à l'extérieur -->
+        <label
+          for="theme-popover-toggle"
+          class="popover-overlay"
+          aria-hidden="true"
+        ></label>
+
+        <div class="popover">
+          <div class="popover-title">Palette rapide</div>
+          <div class="palette-pills">
+            <div class="pill-row">
+              <div class="color-swatch c-indigo"></div>
+              <div class="pill-label">Indigo</div>
+            </div>
+            <div class="pill-row">
+              <div class="color-swatch c-emerald"></div>
+              <div class="pill-label">Émeraude</div>
+            </div>
+            <div class="pill-row">
+              <div class="color-swatch c-rose"></div>
+              <div class="pill-label">Rose</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MODAL CENTRÉE -->
+  <div class="modal-backdrop">
+    <!-- Libellé couvrant l'arrière-plan pour fermer en cliquant dehors -->
+    <label for="theme-modal-toggle" class="modal-overlay" aria-hidden="true"></label>
+    <section class="modal" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <h2 id="modal-title" class="modal-title">Choisir un thème</h2>
+        <!-- Label qui décoche la checkbox pour fermer -->
+        <label
+          for="theme-modal-toggle"
+          class="modal-close-label"
+          title="Fermer"
+        >
+          ✕
+        </label>
+      </div>
+
+      <div class="palette-grid">
+        <label for="theme-modal-toggle" class="color-item">
+          <div class="color-swatch c-indigo"></div>
+          <span class="color-name">indigo</span>
+        </label>
+        <label for="theme-modal-toggle" class="color-item">
+          <div class="color-swatch c-emerald"></div>
+          <span class="color-name">émeraude</span>
+        </label>
+        <label for="theme-modal-toggle" class="color-item">
+          <div class="color-swatch c-rose"></div>
+          <span class="color-name">rose</span>
+        </label>
+        <label for="theme-modal-toggle" class="color-item">
+          <div class="color-swatch c-amber"></div>
+          <span class="color-name">ambre</span>
+        </label>
+        <label for="theme-modal-toggle" class="color-item">
+          <div class="color-swatch c-sky"></div>
+          <span class="color-name">ciel</span>
+        </label>
+        <label for="theme-modal-toggle" class="color-item">
+          <div class="color-swatch c-slate"></div>
+          <span class="color-name">ardoise</span>
+        </label>
+      </div>
+
+      <div class="modal-footer-hint">
+        Clique sur ✕ ou sur l’icône pinceau pour fermer.
+      </div>
+    </section>
+  </div>
+
+  <section class="demo-body">
+    <p>
+      🧠 <strong>Concept important :</strong> la case à cocher
+      <code>#theme-modal-toggle</code> est positionnée avant le header, au même niveau
+      que <code>.modal-backdrop</code>.  
+      C’est ce qui permet à la règle
+      <code>#theme-modal-toggle:checked ~ .modal-backdrop</code> de fonctionner.
+    </p>
+  </section>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQLIA - Text to SQL Oracle</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Prism.js for SQL Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+
+<body class="c-indigo">
+    <input type="file" id="import-schema-input" style="display: none;" accept=".md,.txt">
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <button class="sidebar-toggle-btn" id="sidebar-toggle" style="margin-right: 8px;">
+                    <i data-lucide="panel-left-close"></i>
+                </button>
+                <i data-lucide="database"></i>
+                <span>SQLIA</span>
+            </div>
+
+            <button class="new-chat-btn" id="new-chat-btn">
+                <i data-lucide="plus"></i>
+                <span>Nouveau Chat</span>
+            </button>
+
+            <div class="history-section">
+                <h3 class="history-title">Historique</h3>
+                <div id="history-list">
+                    <!-- Items injectés par JS -->
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="footer-action" onclick="window.location.href='/editor'">
+                    <i data-lucide="layout"></i>
+                    <span>Mode Éditeur (Pro)</span>
+                </div>
+                <div class="footer-action" id="theme-btn" onclick="toggleThemePopover(event)">
+                    <i data-lucide="palette"></i>
+                    <span>Thème & Couleurs</span>
+                </div>
+                <!-- Popover Thème -->
+                <div class="popover-theme" id="theme-popover">
+                    <div style="margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600;">Mode</div>
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <button onclick="setMode('light')" class="footer-action"
+                            style="flex: 1; justify-content: center; height: 36px; padding: 0;"><i data-lucide="sun"
+                                style="width:16px;"></i></button>
+                        <button onclick="setMode('dark')" class="footer-action"
+                            style="flex: 1; justify-content: center; height: 36px; padding: 0;"><i data-lucide="moon"
+                                style="width:16px;"></i></button>
+                    </div>
+                    <div style="margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600;">Couleurs</div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                        <div class="color-swatch" onclick="setColor('indigo')" style="background: #4f46e5;"></div>
+                        <div class="color-swatch" onclick="setColor('emerald')" style="background: #10b981;"></div>
+                        <div class="color-swatch" onclick="setColor('rose')" style="background: #f43f5e;"></div>
+                        <div class="color-swatch" onclick="setColor('amber')" style="background: #f59e0b;"></div>
+                        <div class="color-swatch" onclick="setColor('sky')" style="background: #0ea5e9;"></div>
+                        <div class="color-swatch" onclick="setColor('slate')" style="background: #64748b;"></div>
+                    </div>
+                </div>
+
+                <div class="footer-action" onclick="initDatabase()">
+                    <i data-lucide="database"></i>
+                    <span>Initialiser BDD</span>
+                </div>
+                <div class="footer-action" onclick="seedDatabase()">
+                    <i data-lucide="user-plus"></i>
+                    <span>Alimenter (Faker)</span>
+                </div>
+                <div class="footer-action" onclick="window.location.reload()">
+                    <i data-lucide="refresh-cw"></i>
+                    <span>Actualiser</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-status">
+                    <span id="db-status"><i data-lucide="circle" style="fill: #10b981; stroke: none; width: 10px;"></i>
+                        Oracle Connecté</span>
+                </div>
+            </header>
+
+            <div class="chat-container" id="chat-messages">
+                <div class="message ai">
+                    <div class="message-label">SQLIA Assistant</div>
+                    <div class="message-bubble">
+                        Bonjour ! Je suis votre assistant SQL Oracle. Posez-moi une question en langage naturel sur
+                        votre base de données.
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <button class="icon-btn" onclick="document.getElementById('import-schema-input').click()"
+                        title="Importer un schéma">
+                        <i data-lucide="pin"></i>
+                    </button>
+                    <textarea class="chat-input" id="chat-input" placeholder="Posez votre question ici..."
+                        rows="1"></textarea>
+                    <button class="send-btn" id="send-btn">
+                        <i data-lucide="send"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Confirmation de Suppression -->
+    <div class="modal-backdrop" id="delete-modal">
+        <div class="confirm-modal">
+            <div class="modal-icon">
+                <i data-lucide="alert-triangle"></i>
+            </div>
+            <div class="modal-title">Supprimer cet historique ?</div>
+            <p class="modal-body">Cette action est irréversible. Toutes les données de cette conversation seront
+                perdues.</p>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeDeleteModal()">Annuler</button>
+                <button class="btn-confirm-delete" id="confirm-delete-btn">
+                    <i data-lucide="trash-2" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                    Supprimer définitivement
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

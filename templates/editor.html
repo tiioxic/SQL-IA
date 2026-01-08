@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQLIA Pro - Oracle IDE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css') }}">
+</head>
+
+<body class="c-indigo">
+    <input type="file" id="import-schema-input" style="display: none;" accept=".md,.txt">
+
+    <div class="app-container">
+        <!-- SIDEBAR LEFT (Même que index) -->
+        <aside class="sidebar">
+            <div class="logo">
+                <button class="sidebar-toggle-btn" id="sidebar-toggle">
+                    <i data-lucide="panel-left-close"></i>
+                </button>
+                <i data-lucide="database"></i>
+                <span>SQLIA</span>
+            </div>
+
+            <button class="new-chat-btn" onclick="window.location.reload()">
+                <i data-lucide="plus"></i>
+                <span>Nouveau Projet</span>
+            </button>
+
+            <div class="schema-section">
+                <h3 class="history-title">Explorateur</h3>
+                <div id="schema-list" class="schema-list">
+                    <div class="schema-table">
+                        <i data-lucide="table"></i> <span>CLIENTS</span>
+                    </div>
+                    <div class="schema-table">
+                        <i data-lucide="table"></i> <span>PRODUITS</span>
+                    </div>
+                    <div class="schema-table">
+                        <i data-lucide="table"></i> <span>COMMANDES</span>
+                    </div>
+                    <div class="schema-table">
+                        <i data-lucide="table"></i> <span>DETAILS_COMMANDES</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="footer-action" onclick="window.location.href='/'">
+                    <i data-lucide="message-square"></i>
+                    <span>Mode Chat Classique</span>
+                </div>
+                <div class="footer-action" id="theme-btn" onclick="toggleThemePopover(event)">
+                    <i data-lucide="palette"></i>
+                    <span>Thème & Couleurs</span>
+                </div>
+
+                <!-- Popover Thème -->
+                <div id="theme-popover">
+                    <div style="margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600;">Mode</div>
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <button onclick="setMode('light')" class="footer-action"
+                            style="flex: 1; justify-content: center; height: 36px; padding: 0;"><i
+                                data-lucide="sun"></i></button>
+                        <button onclick="setMode('dark')" class="footer-action"
+                            style="flex: 1; justify-content: center; height: 36px; padding: 0;"><i
+                                data-lucide="moon"></i></button>
+                    </div>
+                    <div style="margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600;">Couleurs</div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                        <div class="color-swatch" onclick="setColor('indigo')" style="background: #4f46e5;"></div>
+                        <div class="color-swatch" onclick="setColor('emerald')" style="background: #10b981;"></div>
+                        <div class="color-swatch" onclick="setColor('rose')" style="background: #f43f5e;"></div>
+                        <div class="color-swatch" onclick="setColor('amber')" style="background: #f59e0b;"></div>
+                        <div class="color-swatch" onclick="setColor('sky')" style="background: #0ea5e9;"></div>
+                        <div class="color-swatch" onclick="setColor('slate')" style="background: #64748b;"></div>
+                    </div>
+                </div>
+
+                <div class="footer-action" onclick="initDatabase()">
+                    <i data-lucide="database"></i>
+                    <span>Initialiser BDD</span>
+                </div>
+                <div class="footer-action" onclick="seedDatabase()">
+                    <i data-lucide="user-plus"></i>
+                    <span>Alimenter (Faker)</span>
+                </div>
+                <div class="footer-action" onclick="window.location.reload()">
+                    <i data-lucide="refresh-cw"></i>
+                    <span>Actualiser</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- WORKSPACE: EDITOR + RESULTS -->
+        <main class="ide-workspace">
+            <section class="pane editor-pane">
+                <div class="pane-header">
+                    <span>Éditeur SQL Oracle</span>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn-primary" id="run-btn" style="background: #10b981;">
+                            <i data-lucide="play"></i> Exécuter
+                        </button>
+                    </div>
+                </div>
+                <div class="editor-pane-content">
+                    <textarea id="sql-editor" spellcheck="false"
+                        placeholder="La requête générée apparaîtra ici..."></textarea>
+                </div>
+            </section>
+
+            <!-- RESIZER VERTICAL -->
+            <div class="resizer-v" id="editor-resizer"></div>
+
+            <section class="pane results-pane">
+                <div class="pane-header">
+                    <span>Résultats</span>
+                    <div class="results-meta">
+                        <div class="export-dropdown">
+                            <button class="btn-export" onclick="toggleExportMenu(event)">
+                                <i data-lucide="download"></i>
+                                <span>Exporter</span>
+                                <i data-lucide="chevron-down" style="width:12px; height:12px;"></i>
+                            </button>
+                            <div class="export-menu" id="export-menu">
+                                <a href="#" onclick="exportData('csv')"><i data-lucide="file-spreadsheet"></i> CSV</a>
+                                <a href="#" onclick="exportData('txt')"><i data-lucide="file-text"></i> TXT (|)</a>
+                            </div>
+                        </div>
+                        <div class="meta-item" id="meta-time" style="display: none;">
+                            <i data-lucide="clock"></i>
+                            <span id="exec-time">0ms</span>
+                        </div>
+                        <div class="meta-item" id="meta-rows" style="display: none;">
+                            <i data-lucide="layers"></i>
+                            <span id="results-count">0 lignes</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="results-pane-content" id="results-area">
+                    <div
+                        style="height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-style: italic;">
+                        Exécutez une requête pour voir les données
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- RESIZER -->
+        <div class="chat-resizer" id="chat-resizer"></div>
+
+        <!-- RIGHT SIDEBAR: AI + DIAGNOSTICS -->
+        <aside class="chat-sidebar" id="chat-sidebar">
+            <div class="sidebar-tabs">
+                <button class="tab-btn active" onclick="switchTab('ai')">Assistant</button>
+                <button class="tab-btn" onclick="switchTab('stats')">Diagnostics</button>
+            </div>
+
+            <!-- AI CONTENT -->
+            <div id="ai-content" class="tab-content active">
+                <header class="chat-header">
+                    <i data-lucide="bot" style="color: var(--primary-color);"></i>
+                    <span>SQLIA Assistant</span>
+                </header>
+
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message ai">
+                        <div class="message-bubble">
+                            Bonjour ! Décrivez-moi la requête dont vous avez besoin, l'IA l'injectera dans l'éditeur.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <div class="chat-input-wrapper">
+                        <button class="footer-action" style="padding: 0; width: 32px; justify-content: center;"
+                            onclick="document.getElementById('import-schema-input').click()">
+                            <i data-lucide="pin"></i>
+                        </button>
+                        <textarea class="chat-textarea" id="chat-input" placeholder="Poser une question..."
+                            rows="1"></textarea>
+                        <button class="btn-primary" id="send-btn"
+                            style="padding: 0.5rem; border-radius: 50%; width: 36px; height: 36px; justify-content: center;">
+                            <i data-lucide="send"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATS CONTENT -->
+            <div id="stats-content" class="tab-content">
+                <header class="chat-header">
+                    <i data-lucide="bar-chart-3" style="color: var(--primary-color);"></i>
+                    <span>Statistiques</span>
+                </header>
+                <div id="column-stats-area" class="stats-container">
+                    <div class="empty-stats">
+                        <i data-lucide="info"></i>
+                        <p>Exécutez une requête pour voir les statistiques des colonnes.</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>
