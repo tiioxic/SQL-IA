@@ -125,7 +125,7 @@ async function handleSendMessage() {
         const response = await fetch('/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query })
+            body: JSON.stringify({ query, mode: 'chat' })
         });
         const data = await response.json();
 
@@ -186,8 +186,15 @@ function addAIMessage(query, sql) {
                 <div class="code-header">
                     <span>ORACLE SQL</span>
                     <div style="display: flex; gap: 0.5rem;">
-                        <button class="btn-edit" style="background: var(--primary-color); border:none; color:white; padding: 0.3rem 0.6rem; border-radius: 4px; cursor:pointer; font-size:0.7rem;">Modifier</button>
-                        <button class="btn-execute" style="background: #10b981; border:none; color:white; padding: 0.3rem 0.6rem; border-radius: 4px; cursor:pointer; font-size:0.7rem; font-weight:600;">Exécuter</button>
+                        <button class="btn-copy" style="background: rgba(255,255,255,0.1); border:none; color:var(--text-muted); padding: 0.3rem 0.6rem; border-radius: 4px; cursor:pointer; font-size:0.7rem; display:flex; align-items:center; gap:4px;">
+                            <i data-lucide="copy" style="width:12px; height:12px;"></i> Copier
+                        </button>
+                        <button class="btn-edit" style="background: var(--primary-color); border:none; color:white; padding: 0.3rem 0.6rem; border-radius: 4px; cursor:pointer; font-size:0.7rem; display:flex; align-items:center; gap:4px;">
+                            <i data-lucide="edit-2" style="width:12px; height:12px;"></i> Modifier
+                        </button>
+                        <button class="btn-execute" style="background: #10b981; border:none; color:white; padding: 0.3rem 0.6rem; border-radius: 4px; cursor:pointer; font-size:0.7rem; font-weight:600; display:flex; align-items:center; gap:4px;">
+                            <i data-lucide="play" style="width:12px; height:12px;"></i> Exécuter
+                        </button>
                     </div>
                 </div>
                 <pre class="code-content" contenteditable="false"><code class="language-sql">${escapedSql}</code></pre>
@@ -200,23 +207,37 @@ function addAIMessage(query, sql) {
 
     const btnExec = msgDiv.querySelector('.btn-execute');
     const btnEdit = msgDiv.querySelector('.btn-edit');
+    const btnCopy = msgDiv.querySelector('.btn-copy');
     const codeBlock = msgDiv.querySelector('.code-content');
 
     btnExec.addEventListener('click', () => executeSQL(btnExec, codeBlock.innerText));
+
+    btnCopy.addEventListener('click', () => {
+        navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+            const oldHtml = btnCopy.innerHTML;
+            btnCopy.innerHTML = '<i data-lucide="check" style="width:12px; height:12px;"></i> Copié !';
+            lucide.createIcons();
+            setTimeout(() => {
+                btnCopy.innerHTML = oldHtml;
+                lucide.createIcons();
+            }, 2000);
+        });
+    });
 
     btnEdit.addEventListener('click', () => {
         const isEditable = codeBlock.getAttribute('contenteditable') === 'true';
         if (isEditable) {
             codeBlock.setAttribute('contenteditable', 'false');
-            btnEdit.innerText = 'Modifier';
+            btnEdit.innerHTML = '<i data-lucide="edit-2" style="width:12px; height:12px;"></i> Modifier';
             btnEdit.style.background = 'var(--primary-color)';
             Prism.highlightElement(codeBlock.querySelector('code'));
         } else {
             codeBlock.setAttribute('contenteditable', 'true');
-            btnEdit.innerText = 'Sauvegarder';
+            btnEdit.innerHTML = '<i data-lucide="save" style="width:12px; height:12px;"></i> Sauvegarder';
             btnEdit.style.background = '#10b981';
             codeBlock.focus();
         }
+        lucide.createIcons();
     });
 
     Prism.highlightAll();

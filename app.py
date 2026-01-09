@@ -61,11 +61,12 @@ def upload_schema():
 def generate():
     data = request.json
     user_query = data.get("query")
-    print(f"DEBUG: Requête reçue: {user_query}")
+    mode = data.get("mode", "editor") # Default to editor
+    print(f"DEBUG: Requête reçue (Mode: {mode}): {user_query}")
     if not user_query:
         return jsonify({"error": "La requête est vide"}), 400
     
-    llm_res = llm.generate_sql(user_query)
+    llm_res = llm.generate_sql(user_query, mode=mode)
     
     if isinstance(llm_res, str):
         return jsonify({"sql": llm_res, "explanation": "Erreur ou requête invalide."})

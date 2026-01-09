@@ -8,14 +8,17 @@ class LLMHandler:
         self.base_url = base_url
         self.api_url = f"{base_url}/api/generate"
 
-    def get_system_prompt(self):
+    def get_schema(self):
         schema_path = os.path.join(os.path.dirname(__file__), '..', 'docs', 'database_schema.md')
         try:
             with open(schema_path, 'r', encoding='utf-8') as f:
-                schema_doc = f.read()
+                return f.read()
         except FileNotFoundError:
-            schema_doc = "Documentation du schéma non disponible."
+            return "Documentation du schéma non disponible."
 
+    def get_editor_prompt(self):
+        # Prompt STICT pour l'éditeur : SQL pur, règles rigides
+        schema_doc = self.get_schema()
         return f"""### Task
 Translate the natural language query into a valid Oracle SQL query.
 Use the following database schema:
@@ -35,12 +38,43 @@ Use the following database schema:
 SELECT ...
 """
 
-    def generate_sql(self, user_query):
-        # Vérification rapide avant l'appel (optionnel mais efficace pour les cas évidents)
+    def get_chat_prompt(self):
+        # Prompt pour le CHAT (Index) : Peut être un peu plus complet ou conversationnel si besoin
+        # Pour l'instant on garde une structure similaire mais on peut l'adapter facilement
+        # Le user veut "deux fichiers différents" -> ici deux méthodes distinctes.
+        schema_doc = self.get_schema()
+        return f"""### Task
+You are an intelligent Oracle SQL Assistant. Your goal is to help the user by generating the correct SQL query based on their request.
+Use the following database schema:
+{schema_doc}
+
+### Rules
+1. Always respond with a VALID Oracle SQL query.
+2. ORACLE RULES:
+   - Use 'FETCH FIRST n ROWS ONLY' instead of LIMIT.
+   - Use 'SYSDATE' for dates.
+   - Use '||' for concatenation.
+3. Start your response with a clear comment in FRENCH explaining your logic ("-- Explication: ...").
+4. If the request is ambiguous, make a reasonable assumption and mention it in the comments.
+5. Do not include markdown code block syntax (```sql) inside the SQL part if possible, but the parser handles it.
+
+### Response Format
+-- Explication: [Explication détaillée en français]
+SELECT ...
+"""
+
+    def generate_sql(self, user_query, mode="editor"):
+        # Vérification rapide
         if len(user_query.strip()) < 3 or user_query.strip().lower() in ["abc", "test", "test1"]:
             return "INVALID_QUERY"
 
-        prompt = f"{self.get_system_prompt()}\n\nDemande utilisateur : {user_query}\nSQL :"
+        # Choix du prompt selon le mode
+        if mode == "chat":
+            system_prompt = self.get_chat_prompt()
+        else:
+            system_prompt = self.get_editor_prompt()
+
+        prompt = f"{system_prompt}\n\nDemande utilisateur : {user_query}\nSQL :"
 
         payload = {
             "model": self.model_name,
@@ -52,7 +86,7 @@ SELECT ...
         }
 
         try:
-            print(f"DEBUG: Envoi à Ollama ({self.model_name})...")
+            print(f"DEBUG: Envoi à Ollama ({self.model_name}) [Mode: {mode}]...")
             response = requests.post(self.api_url, json=payload, timeout=45)
             response.raise_for_status()
             data = response.json()

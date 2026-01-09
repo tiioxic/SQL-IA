@@ -14,7 +14,7 @@ export async function handleSendMessage() {
         const response = await fetch('/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query })
+            body: JSON.stringify({ query, mode: 'editor' })
         });
         const data = await response.json();
         removeChatMessage(loadingId);

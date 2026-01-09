@@ -20,10 +20,10 @@ EMOJIS=(
     ["feat"]="✨"
     ["fix"]="🐛"
     ["docs"]="📝"
-    ["style"]="💄"
+    ["style"]="🎨"
     ["refactor"]="♻️"
     ["perf"]="⚡️"
-    ["test"]="✅"
+    ["test"]="🧪"
     ["build"]="🏗️"
     ["ci"]="👷"
     ["chore"]="🔧"
@@ -56,8 +56,10 @@ if [[ -n "${EMOJIS[$TYPE]}" ]]; then
         echo -e "${GREEN}Emoji $EMOJI ajouté au commit '$TYPE'!${NC}"
     fi
 else
-    # Nous laissons passer le commit même si le type n'a pas d'emoji défini, tant qu'il respecte le format regex.
-    echo -e "${GREEN}Commit valide (type '$TYPE' sans emoji spécifique).${NC}"
+    # Rejet strict si le type n'est pas dans la liste autorisée
+    echo -e "${RED}Erreur : Type de commit '$TYPE' inconnu ou non autorisé.${NC}"
+    echo -e "${RED}Types autorisés uniquement : ${!EMOJIS[@]}${NC}"
+    exit 1
 fi
 
 exit 0

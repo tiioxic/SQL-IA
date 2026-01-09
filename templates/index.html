@@ -91,9 +91,17 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="header">
-                <div class="header-status">
-                    <span id="db-status"><i data-lucide="circle" style="fill: #10b981; stroke: none; width: 10px;"></i>
-                        Oracle Connecté</span>
+                <div class="header-status" style="display: flex; gap: 1rem; align-items: center;">
+                    <span id="db-status" style="display: flex; align-items: center; gap: 6px;">
+                        <i data-lucide="database" style="color: #10b981; width: 14px;"></i>
+                        Oracle Connecté
+                    </span>
+                    <span style="color: var(--border-color);">|</span>
+                    <span id="llm-status"
+                        style="display: flex; align-items: center; gap: 6px; color: var(--text-muted);">
+                        <i data-lucide="brain-circuit" style="width: 14px;"></i>
+                        sqlcoder:7b
+                    </span>
                 </div>
             </header>
 

@@ -92,11 +92,25 @@
         <main class="ide-workspace">
             <section class="pane editor-pane">
                 <div class="pane-header">
-                    <span>Éditeur SQL Oracle</span>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-weight: 600;">Éditeur SQL Oracle</span>
+                        <div class="header-status"
+                            style="display: flex; gap: 0.8rem; align-items: center; font-size: 0.8rem; padding: 2px 8px; background: rgba(255,255,255,0.05); border-radius: 4px; border: 1px solid var(--border-color);">
+                            <span id="db-status-editor" style="display: flex; align-items: center; gap: 4px;">
+                                <i data-lucide="database" style="color: #10b981; width: 12px;"></i>
+                                <span style="color: var(--text-muted);">Oracle</span>
+                            </span>
+                            <span style="color: var(--border-color); opacity: 0.5;">|</span>
+                            <span id="llm-status-editor" style="display: flex; align-items: center; gap: 4px;">
+                                <i data-lucide="brain-circuit" style="width: 12px; color: var(--primary-color);"></i>
+                                <span style="color: var(--text-muted);">sqlcoder:7b</span>
+                            </span>
+                        </div>
+                    </div>
                     <div style="display: flex; gap: 0.5rem;">
                         <button class="btn-secondary" id="fix-btn" onclick="window.fixSQL()"
                             title="Corriger la requête avec l'IA">
-                            <i data-lucide="wrench"></i> Corriger
+                            <i data-lucide="bug-off"></i> Corriger
                         </button>
                         <button class="btn-primary" id="run-btn" style="background: #10b981;">
                             <i data-lucide="play"></i> Exécuter
