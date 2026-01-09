@@ -48,3 +48,15 @@ Cette application permet de générer des requêtes Oracle SQL à partir du lang
 - `docs/database_schema.md` : Documentation fournie à l'IA pour comprendre votre schéma.
 - `static/` : CSS, JS et images.
 - `templates/` : Structure HTML.
+
+## Développement et Contribution
+
+Pour garantir la qualité des messages de commit, nous utilisons des **hooks Git partagés**.
+
+**Installation du hook :**
+Après avoir cloné le projet, exécutez cette commande pour activer les vérifications automatiques (emojis, format, longueur) :
+```bash
+git config core.hooksPath .githooks
+```
+Cela forcera vos commits à respecter la convention (ex: `feat: ajout de ...`) et ajoutera automatiquement les emojis appropriés.
+

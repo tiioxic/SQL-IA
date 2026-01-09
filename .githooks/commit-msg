@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# Configuration
+MIN_LENGTH=10
+MAX_LENGTH=72
+COMMIT_MSG_FILE=$1
+# Lire la première ligne du fichier de message de commit
+COMMIT_MSG=$(head -n 1 "$COMMIT_MSG_FILE")
+# Extraire le type (ex: feat, fix)
+TYPE=$(echo "$COMMIT_MSG" | grep -oE '^[a-z]+' | head -n 1)
+
+# Couleurs pour le terminal
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+# Dictionnaire des types et emojis correspondants
+declare -A EMOJIS
+EMOJIS=(
+    ["feat"]="✨"
+    ["fix"]="🐛"
+    ["docs"]="📝"
+    ["style"]="💄"
+    ["refactor"]="♻️"
+    ["perf"]="⚡️"
+    ["test"]="✅"
+    ["build"]="🏗️"
+    ["ci"]="👷"
+    ["chore"]="🔧"
+    ["revert"]="⏪"
+)
+
+# 1. Vérification de la longueur du message
+MSG_LEN=${#COMMIT_MSG}
+if [ $MSG_LEN -lt $MIN_LENGTH ] || [ $MSG_LEN -gt $MAX_LENGTH ]; then
+    echo -e "${RED}Erreur : La longueur du message ($MSG_LEN) doit être comprise entre $MIN_LENGTH et $MAX_LENGTH caractères.${NC}"
+    exit 1
+fi
+
+# 2. Vérification du format Conventionnel (type: message ou type(scope): message)
+if ! [[ "$COMMIT_MSG" =~ ^[a-z]+(\(.+\))?!?: ]]; then
+    echo -e "${RED}Erreur : Le message ne respecte pas le format 'type: description' ou 'type(scope): description'.${NC}"
+    echo -e "Types valides: ${!EMOJIS[@]}"
+    exit 1
+fi
+
+# 3. Ajout de l'emoji si le type est reconnu
+if [[ -n "${EMOJIS[$TYPE]}" ]]; then
+    EMOJI="${EMOJIS[$TYPE]}"
+    
+    # Vérifie si l'emoji est déjà présent pour ne pas le dupliquer
+    if [[ "$COMMIT_MSG" != *"$EMOJI"* ]]; then
+        # On utilise sed pour modifier le fichier en place
+        # Modèle: "✨ type: message"
+        sed -i "1s/^/$EMOJI /" "$COMMIT_MSG_FILE"
+        echo -e "${GREEN}Emoji $EMOJI ajouté au commit '$TYPE'!${NC}"
+    fi
+else
+    # Nous laissons passer le commit même si le type n'a pas d'emoji défini, tant qu'il respecte le format regex.
+    echo -e "${GREEN}Commit valide (type '$TYPE' sans emoji spécifique).${NC}"
+fi
+
+exit 0
