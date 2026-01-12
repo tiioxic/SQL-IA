@@ -19,7 +19,7 @@ class DBManager:
             )
             return conn
         except Exception as e:
-            print(f"Erreur de connexion Oracle : {e}")
+            print(f"Erreur de connexion Oracle (DSN={self.dsn}, User={self.user}) : {e}")
             return None
 
     def execute_query(self, sql):
