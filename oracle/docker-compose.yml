@@ -1,0 +1,29 @@
+services:
+  oracle:
+    image: gvenzl/oracle-free:latest-faststart
+    container_name: oracle-free
+    restart: unless-stopped
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PASSWORD: "hX$ZM^xG&x1vgwr0esbRcDS2meCyxK"
+      APP_USER: "appuser"
+      APP_USER_PASSWORD: "TxSXv0wk$F3W^wBqSY5st$UUJUSGMJ"
+    volumes:
+      - oradata:/opt/oracle/oradata
+      - ./init:/container-entrypoint-initdb.d:ro
+    networks:
+      homelab:
+        aliases:
+          - oracle
+          - oracle-free
+    env_file:
+      - .env
+
+volumes:
+  oradata:
+
+networks:
+  homelab:
+    external: true
+    name: homelab

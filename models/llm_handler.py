@@ -3,10 +3,15 @@ import json
 import os
 
 class LLMHandler:
-    def __init__(self, model_name="sqlcoder:7b", base_url="http://127.0.0.1:11434"):
+    def __init__(self, model_name="sqlcoder:7b", base_url=None):
         self.model_name = model_name
-        self.base_url = base_url
-        self.api_url = f"{base_url}/api/generate"
+        # Si base_url n'est pas fourni, on regarde la variable d'env, sinon valeur par défaut locale
+        if base_url is None:
+            self.base_url = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+        else:
+            self.base_url = base_url
+            
+        self.api_url = f"{self.base_url}/api/generate"
 
     def get_schema(self):
         schema_path = os.path.join(os.path.dirname(__file__), '..', 'docs', 'database_schema.md')
