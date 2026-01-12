@@ -11,10 +11,10 @@ services:
       # On pointe maintenant vers le service docker "ollama"
       - OLLAMA_BASE_URL=http://ollama:11434
       # Configuration Oracle
-      - ORACLE_USER=${ORACLE_USER:-appuser}
-      - ORACLE_PASSWORD=${ORACLE_PASSWORD:-ChangeMeApp1!}
+      - ORACLE_USER=${ORACLE_USER}
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD}
       - ORACLE_DSN=oracle:1521/FREEPDB1
-      - APP_USER=${APP_USER:-appuser}
+      - APP_USER=${ORACLE_USER}
     depends_on:
       - oracle
       - ollama
@@ -26,9 +26,9 @@ services:
     ports:
       - "1521:1521"
     environment:
-      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-ChangeMeApp1!}
-      APP_USER: ${APP_USER:-appuser}
-      APP_USER_PASSWORD: ${APP_USER_PASSWORD:-ChangeMeApp1!}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      APP_USER: ${ORACLE_USER}
+      APP_USER_PASSWORD: ${APP_USER_PASSWORD}
     volumes:
       - ./oracle/oradata:/opt/oracle/oradata
       - ./oracle/init:/container-entrypoint-initdb.d:ro
