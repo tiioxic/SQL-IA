@@ -12,7 +12,7 @@ services:
       - OLLAMA_BASE_URL=http://ollama:11434
       # Configuration Oracle
       - ORACLE_USER=${ORACLE_USER}
-      - ORACLE_PASSWORD=${ORACLE_PASSWORD}
+      - ORACLE_PASSWORD=${APP_USER_PASSWORD}
       - ORACLE_DSN=oracle:1521/FREEPDB1
       - APP_USER=${ORACLE_USER}
     depends_on:
