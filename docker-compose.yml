@@ -30,7 +30,7 @@ services:
       APP_USER: ${ORACLE_USER}
       APP_USER_PASSWORD: ${APP_USER_PASSWORD}
     volumes:
-      - ./oracle/oradata:/opt/oracle/oradata
+      - ./oracle/oradata_fresh:/opt/oracle/oradata
       - ./oracle/init:/container-entrypoint-initdb.d:ro
 
   ollama:
